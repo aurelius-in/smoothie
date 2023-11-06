@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smoothie Maker Game</title>
+<style>
+  body {
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+  }
+  #gameArea {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    margin: 20px auto;
+    border: 1px solid #000;
+  }
+  .draggable {
+    position: absolute;
+    cursor: pointer;
+    user-select: none;
+  }
+  .blender {
+    position: absolute;
+    width: 100px;
+    height: 150px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ccc;
+    border: 2px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .glass {
+    position: absolute;
+    width: 60px;
+    height: 100px;
+    bottom: 0;
+    right: 20px;
+    background: #fff;
+    border: 2px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .score {
+    font-size: 24px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Smoothie Maker Game</h1>
+<div id="gameArea">
+  <div id="blender" class="blender"></div>
+  <div id="glass" class="glass"></div>
+  <!-- Draggable fruits -->
+  <div class="draggable" style="left:10px; top:10px;">🍋</div>
+  <div class="draggable" style="left:50px; top:10px;">🍎</div>
+  <div class="draggable" style="left:90px; top:10px;">🍏</div>
+  <!-- ... Add the rest of the fruits and vegetables here -->
+</div>
+<p class="score">Score: <span id="score">0</span></p>
+
+<script>
+  let score = 0;
+
+  // Function to make elements draggable
+  function makeDraggable(elmnt) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    elmnt.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+      e.preventDefault();
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+      e.preventDefault();
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+      document.onmouseup = null;
+      document.onmousemove = null;
+      checkIfInsideBlender(elmnt);
+    }
+  }
+
+  // Check if the fruit is inside the blender or the glass
+  function checkIfInsideBlender(elmnt) {
+    const blender = document.getElementById('blender');
+    const glass = document.getElementById('glass');
+    const scoreElement = document.getElementById('score');
+    const blenderRect = blender.getBoundingClientRect();
+    const glassRect = glass.getBoundingClientRect();
+    const fruitRect = elmnt.getBoundingClientRect();
+
+    if (fruitRect.left > blenderRect.left && fruitRect.right < blenderRect.right &&
+        fruitRect.top > blenderRect.top && fruitRect.bottom < blenderRect.bottom) {
+      score++;
+      elmnt.remove(); // Remove the fruit once it's in the blender
+    } else if (fruitRect.left > glassRect.left && fruitRect.right < glassRect.right &&
+               fruitRect.top > glassRect.top && fruitRect.bottom < glassRect.bottom) {
+      score -= 2; // Lose points if fruit is in the glass
+      elmnt.remove(); // Remove the fruit
+    }
+
+    scoreElement.innerText = score;
+  }
+
+  // Initialize the game by making all fruits draggable
+  const fruits = document.getElementsByClassName('draggable');
+  for (let i = 0; i < fruits.length; i++) {
+    makeDraggable(fruits[i]);
+  }
+</script>
+
+</body>
+</html>
